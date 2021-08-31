@@ -25,7 +25,6 @@ class SdkCurlFactory implements CurlFactoryInterface
             $options['_body_as_string'] = $options['curl']['body_as_string'];
             unset($options['curl']['body_as_string']);
         }
-
         $easy = new EasyHandle;
         $easy->request = $request;
         $easy->options = $options;
@@ -47,6 +46,7 @@ class SdkCurlFactory implements CurlFactoryInterface
         } else {
             $easy->handle = curl_init();
         }
+
         curl_setopt_array($easy->handle, $conf);
 
         return $easy;
@@ -63,7 +63,7 @@ class SdkCurlFactory implements CurlFactoryInterface
         }
     }
 
-    public function release(EasyHandle $easy)
+    public function release(EasyHandle $easy):void
     {
         $resource = $easy->handle;
         unset($easy->handle);
@@ -265,7 +265,7 @@ class SdkCurlFactory implements CurlFactoryInterface
             };
         } else {
             $conf[CURLOPT_FILE] = fopen('php://temp', 'w+');
-            $easy->sink = Psr7\stream_for($conf[CURLOPT_FILE]);
+            $easy->sink =  new Psr7\Stream($conf[CURLOPT_FILE]);
         }
         $timeoutRequiresNoSignal = false;
         if (isset($options['timeout'])) {
