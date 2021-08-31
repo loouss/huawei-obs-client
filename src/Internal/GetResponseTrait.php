@@ -418,6 +418,8 @@ trait GetResponseTrait
     protected function buildException(Request $request, RequestException $exception, $message)
     {
         $response = $exception->hasResponse() ? $exception->getResponse() : null;
+        $con = $request->getBody()->getContents();
+        var_dump($con);
         $obsException = new ObsException($message ? $message : $exception->getMessage());
         $obsException->setExceptionType('client');
         $obsException->setRequest($request);
@@ -440,6 +442,7 @@ trait GetResponseTrait
 
     protected function parseExceptionAsync(Request $request, RequestException $exception, $message = null)
     {
+        var_dump(get_class($exception));
         return $this->buildException($request, $exception, $message);
     }
 

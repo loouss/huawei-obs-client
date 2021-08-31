@@ -212,6 +212,8 @@ class ObsClient
 
     private array $factorys;
 
+    protected ?HandlerStack $handlerStack = null;
+
     public function __construct(array $config = [])
     {
         $this->factorys = [];
@@ -292,7 +294,7 @@ class ObsClient
             $this->pathStyle = true;
         }
 
-        $handler = self::choose_handler($this);
+        // $handler = self::choose_handler($this);
 
         $this->httpClient = new Client(
             [
@@ -302,10 +304,7 @@ class ObsClient
                 'allow_redirects' => false,
                 'verify' => $this->sslVerify,
                 'expect' => false,
-                'handler' => HandlerStack::create($handler),
-                'curl' => [
-                    CURLOPT_BUFFERSIZE => $this->chunkSize
-                ]
+                'handler' => $this->getHandlerStack(),
             ]
         );
     }
@@ -313,6 +312,33 @@ class ObsClient
     public function __destruct()
     {
         $this->close();
+    }
+
+    /**
+     * @param  HandlerStack  $handlerStack
+     * @return $this
+     */
+    public function setHandlerStack(HandlerStack $handlerStack): ObsClient
+    {
+        $this->handlerStack = $handlerStack;
+
+        return $this;
+    }
+
+    /**
+     * Build a handler stack.
+     *
+     * @return \GuzzleHttp\HandlerStack
+     */
+    public function getHandlerStack(): HandlerStack
+    {
+        if ($this->handlerStack) {
+            return $this->handlerStack;
+        }
+
+        $this->handlerStack = HandlerStack::create();
+
+        return $this->handlerStack;
     }
 
     public function refresh($key, $secret, $security_token = false)
