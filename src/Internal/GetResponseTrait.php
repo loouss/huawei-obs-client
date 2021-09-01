@@ -442,7 +442,6 @@ trait GetResponseTrait
 
     protected function parseExceptionAsync(Request $request, RequestException $exception, $message = null)
     {
-        var_dump(get_class($exception));
         return $this->buildException($request, $exception, $message);
     }
 
