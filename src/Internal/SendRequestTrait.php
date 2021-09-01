@@ -2,6 +2,7 @@
 
 namespace Loouss\ObsClient\Internal;
 
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7;
 use Loouss\ObsClient\Log\ObsLog;
 use GuzzleHttp\Psr7\Request;
@@ -614,8 +615,17 @@ trait SendRequestTrait
             }
         }
 
-        $promise = $this->httpClient->sendAsync($request, ['stream' => $saveAsStream])->then(
-            function (Response $response) use ($model, $operation, $params, $request, $requestCount, $start) {
+        try {
+            $response = $this->httpClient->send($request, ['stream' => $saveAsStream]);
+
+            $resolve = function (Response $response) use (
+                $model,
+                $operation,
+                $params,
+                $request,
+                $requestCount,
+                $start
+            ) {
                 ObsLog::commonLog(INFO, 'http request cost '.round(microtime(true) - $start, 3) * 1000 .' ms');
                 $statusCode = $response->getStatusCode();
                 $readable = isset($params['Body']) && ($params['Body'] instanceof StreamInterface || is_resource($params['Body']));
@@ -631,8 +641,17 @@ trait SendRequestTrait
                     }
                 }
                 $this->parseResponse($model, $request, $response, $operation);
-            },
-            function (RequestException $exception) use ($model, $operation, $params, $request, $requestCount, $start) {
+            };
+            $resolve($response);
+        } catch (GuzzleException $e) {
+            $reject = function (RequestException $exception) use (
+                $model,
+                $operation,
+                $params,
+                $request,
+                $requestCount,
+                $start
+            ) {
                 ObsLog::commonLog(INFO, 'http request cost '.round(microtime(true) - $start, 3) * 1000 .' ms');
                 $message = null;
                 if ($exception instanceof ConnectException) {
@@ -644,10 +663,10 @@ trait SendRequestTrait
                     }
                 }
                 $this->parseException($model, $request, $exception, $message);
-            });
-        $promise->wait();
+            };
+            $reject($e);
+        }
     }
-
 
     protected function doRequestAsync(
         $model,
