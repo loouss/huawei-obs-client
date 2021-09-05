@@ -56,5 +56,6 @@ class ObsClientConst
     const ObjectRemovedDelete = 'ObjectRemoved:Delete';
     const ObjectRemovedDeleteMarkerCreated = 'ObjectRemoved:DeleteMarkerCreated';
 
-    const REQUEST_RESOURCE = \Loouss\ObsClient\Internal\Resource\OBSRequestResource::class;
+    const REQUEST_RESOURCE = \Loouss\ObsClient\Constant\ObsRequestResource::class;
+    const OBS_CONSTANT = \Loouss\ObsClient\Constant\ObsConstants::class;
 }

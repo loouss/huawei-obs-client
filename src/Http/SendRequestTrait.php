@@ -1,19 +1,18 @@
 <?php
 
-namespace Loouss\ObsClient\Internal;
+namespace Loouss\ObsClient\Http;
 
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7;
 use Loouss\ObsClient\Constant\ObsClientConst;
 use Loouss\ObsClient\Exceptions\RuntimeException;
-use Loouss\ObsClient\Log\ObsLog;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ConnectException;
-use Loouss\ObsClient\Internal\Common\Model;
+use Loouss\ObsClient\Http\Common\Model;
 use Loouss\ObsClient\ObsException;
-use Loouss\ObsClient\Internal\Signature\DefaultSignature;
+use Loouss\ObsClient\Signature\DefaultSignature;
 use GuzzleHttp\Client;
 use Loouss\ObsClient\Internal\Resource\Constants;
 use Psr\Http\Message\StreamInterface;
@@ -363,7 +362,6 @@ trait SendRequestTrait
                 $requestCount,
                 $start
             ) {
-                ObsLog::commonLog(INFO, 'http request cost ' . round(microtime(true) - $start, 3) * 1000 . ' ms');
                 $statusCode = $response->getStatusCode();
                 $readable = isset($params['Body']) && ($params['Body'] instanceof StreamInterface || is_resource($params['Body']));
                 if ($statusCode >= 300 && $statusCode < 400 && $statusCode !== 304 && !$readable && $requestCount <= $this->maxRetryCount) {
@@ -389,7 +387,6 @@ trait SendRequestTrait
                 $requestCount,
                 $start
             ) {
-                ObsLog::commonLog(INFO, 'http request cost ' . round(microtime(true) - $start, 3) * 1000 . ' ms');
                 $message = null;
                 if ($exception instanceof ConnectException) {
                     if ($requestCount <= $this->maxRetryCount) {

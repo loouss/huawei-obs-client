@@ -1,8 +1,8 @@
 <?php
 
-namespace Loouss\ObsClient\Internal\Common;
+namespace Loouss\ObsClient\Http\Common;
 
-class Model implements \ArrayAccess, \IteratorAggregate, \Countable, ToArrayInterface
+class Model implements \ArrayAccess, \IteratorAggregate, \Countable
 {
     protected $data;
 

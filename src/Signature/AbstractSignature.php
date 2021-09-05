@@ -1,20 +1,17 @@
 <?php
 
-namespace Loouss\ObsClient\Internal\Signature;
+namespace Loouss\ObsClient\Signature;
 
-use Loouss\ObsClient\Log\ObsLog;
-use Loouss\ObsClient\Internal\Resource\Constants;
+use Loouss\ObsClient\Constant\ObsClientConst;
+use Loouss\ObsClient\Http\Common\Model;
+use Loouss\ObsClient\Http\Common\ObsTransform;
+use Loouss\ObsClient\Http\Common\SchemaFormatter;
 use Loouss\ObsClient\ObsException;
-use Loouss\ObsClient\Internal\Common\SchemaFormatter;
 use GuzzleHttp\Psr7\Stream;
-use Loouss\ObsClient\Internal\Common\Model;
 use Psr\Http\Message\StreamInterface;
-use Loouss\ObsClient\Internal\Common\ObsTransform;
-use Loouss\ObsClient\Internal\Common\V2Transform;
 
 abstract class AbstractSignature
 {
-
     protected $ak;
 
     protected $sk;
@@ -219,8 +216,7 @@ abstract class AbstractSignature
 
     protected function prepareAuth(array &$requestConfig, array &$params, Model $model): array
     {
-        $transHolder = strcasecmp($this->signature,
-            'obs') === 0 ? ObsTransform::getInstance() : V2Transform::getInstance();
+        $transHolder = ObsTransform::getInstance();
         $method = $requestConfig['httpMethod'];
         $requestUrl = $this->endpoint;
         $headers = [];
@@ -447,7 +443,6 @@ abstract class AbstractSignature
             $headers['Content-Type'] = 'application/xml';
             $result['body'] = implode('', $body);
 
-            ObsLog::commonLog(DEBUG, 'request content ' . $result['body']);
 
             if (isset($requestConfig['data']['contentMd5']) && $requestConfig['data']['contentMd5']) {
                 $headers['Content-MD5'] = base64_encode(md5($result['body'], true));
@@ -483,7 +478,7 @@ abstract class AbstractSignature
             }
         }
 
-        $constants = Constants::selectConstants($this->signature);
+        $constants = ObsClientConst::OBS_CONSTANT;
 
         if ($this->securityToken) {
             $headers[$constants::SECURITY_TOKEN_HEAD] = $this->securityToken;

@@ -2,7 +2,8 @@
 
 namespace Loouss\ObsClient;
 
-use Loouss\ObsClient\Internal\Common\Model;
+use Loouss\ObsClient\Http\GetResponseTrait;
+use Loouss\ObsClient\Http\SendRequestTrait;
 use Monolog\Logger;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
@@ -149,8 +150,8 @@ class ObsClient
 {
 
 
-    use Internal\SendRequestTrait;
-    use Internal\GetResponseTrait;
+    use SendRequestTrait;
+    use GetResponseTrait;
 
     private array $factorys;
 
