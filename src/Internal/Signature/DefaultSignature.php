@@ -4,12 +4,10 @@ namespace Loouss\ObsClient\Internal\Signature;
 
 use Loouss\ObsClient\Internal\Resource\Constants;
 use Loouss\ObsClient\Internal\Common\Model;
-use Loouss\ObsClient\Internal\Resource\V2Constants;
 
 class DefaultSignature extends AbstractSignature
 {
     const INTEREST_HEADER_KEY_LIST = array('content-type', 'content-md5', 'date');
-
 
     public function __construct(
         $ak,
@@ -24,7 +22,7 @@ class DefaultSignature extends AbstractSignature
         parent::__construct($ak, $sk, $pathStyle, $endpoint, $methodName, $signature, $securityToken, $isCname);
     }
 
-    public function doAuth(array &$requestConfig, array &$params, Model $model)
+    public function doAuth(array &$requestConfig, array &$params, Model $model): array
     {
         $result = $this->prepareAuth($requestConfig, $params, $model);
 
@@ -46,7 +44,7 @@ class DefaultSignature extends AbstractSignature
         return $result;
     }
 
-    public function makeCanonicalstring($method, $headers, $pathArgs, $bucketName, $objectKey, $expires = null)
+    public function makeCanonicalstring($method, $headers, $pathArgs, $bucketName, $objectKey, $expires = null): string
     {
         $buffer = [];
         $buffer[] = $method;

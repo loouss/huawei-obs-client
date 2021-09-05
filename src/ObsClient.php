@@ -2,18 +2,11 @@
 
 namespace Loouss\ObsClient;
 
-use Loouss\ObsClient\Log\ObsLog;
-use Loouss\ObsClient\Internal\Common\SdkCurlFactory;
-use Loouss\ObsClient\Internal\Common\SdkStreamHandler;
 use Loouss\ObsClient\Internal\Common\Model;
 use Monolog\Logger;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Handler\CurlHandler;
-use GuzzleHttp\Handler\CurlMultiHandler;
-use GuzzleHttp\Handler\Proxy;
 use GuzzleHttp\Promise\Promise;
-use Loouss\ObsClient\Internal\Resource\Constants;
 
 
 define('DEBUG', Logger::DEBUG);
@@ -156,7 +149,6 @@ class ObsClient
 {
 
 
-
     use Internal\SendRequestTrait;
     use Internal\GetResponseTrait;
 
@@ -164,35 +156,27 @@ class ObsClient
 
     protected ?HandlerStack $handlerStack = null;
 
-    public function __construct(array $config = [])
+    public function __construct(string $ak, string $sk, string $endpoint, array $config = [])
     {
         $this->factorys = [];
 
-        $this->ak = strval($config['key']);
-        $this->sk = strval($config['secret']);
+        $this->ak = $ak;
+        $this->sk = $sk;
+
 
         if (isset($config['security_token'])) {
             $this->securityToken = strval($config['security_token']);
         }
 
-        if (isset($config['endpoint'])) {
-            $this->endpoint = trim(strval($config['endpoint']));
-        }
 
-        if ($this->endpoint === '') {
-            throw new \RuntimeException('endpoint is not set');
-        }
+        $this->endpoint = $endpoint;
 
         while ($this->endpoint[strlen($this->endpoint) - 1] === '/') {
             $this->endpoint = substr($this->endpoint, 0, strlen($this->endpoint) - 1);
         }
 
         if (strpos($this->endpoint, 'http') !== 0) {
-            $this->endpoint = 'https://'.$this->endpoint;
-        }
-
-        if (isset($config['signature'])) {
-            $this->signature = strval($config['signature']);
+            $this->endpoint = 'https://' . $this->endpoint;
         }
 
         if (isset($config['path_style'])) {
@@ -244,8 +228,6 @@ class ObsClient
             $this->pathStyle = true;
         }
 
-        // $handler = self::choose_handler($this);
-
         $this->httpClient = new Client(
             [
                 'timeout' => 0,
@@ -265,7 +247,7 @@ class ObsClient
     }
 
     /**
-     * @param  HandlerStack  $handlerStack
+     * @param HandlerStack $handlerStack
      * @return $this
      */
     public function setHandlerStack(HandlerStack $handlerStack): ObsClient
@@ -301,15 +283,13 @@ class ObsClient
     }
 
     /**
-     * Get the default User-Agent string to use with Guzzle
-     *
      * @return string
      */
-    private static function default_user_agent()
+    private static function defaultUserAgent(): string
     {
         static $defaultAgent = '';
         if (!$defaultAgent) {
-            $defaultAgent = 'obs-sdk-php/'.self::SDK_VERSION;
+            $defaultAgent = 'obs-sdk-php/';
         }
 
         return $defaultAgent;
@@ -318,7 +298,7 @@ class ObsClient
     /**
      * Factory method to create a new src client using an array of configuration options.
      *
-     * @param  array  $config  Client configuration data
+     * @param array $config Client configuration data
      *
      * @return ObsClient
      */
@@ -336,49 +316,5 @@ class ObsClient
         }
     }
 
-    public function initLog(array $logConfig = [])
-    {
-        ObsLog::initLog($logConfig);
 
-        $msg = [];
-        $msg[] = '[OBS SDK Version='.self::SDK_VERSION;
-        $msg[] = 'Endpoint='.$this->endpoint;
-        $msg[] = 'Access Mode='.($this->pathStyle ? 'Path' : 'Virtual Hosting').']';
-
-        ObsLog::commonLog(WARNING, implode("];[", $msg));
-    }
-
-    private static function choose_handler(ObsClient $obsClient)
-    {
-        $handler = null;
-
-        $f1 = new SdkCurlFactory(50);
-
-        if (function_exists('curl_multi_exec') && function_exists('curl_exec')) {
-            $f2 = new SdkCurlFactory(3);
-            $obsClient->factorys[] = $f1;
-            $obsClient->factorys[] = $f2;
-            $handler = Proxy::wrapSync(new CurlMultiHandler(['handle_factory' => $f1]),
-                new CurlHandler(['handle_factory' => $f2]));
-        } elseif (function_exists('curl_exec')) {
-            $f = new SdkCurlFactory(3);
-            $obsClient->factorys[] = $f;
-            $handler = new CurlHandler(['handle_factory' => $f]);
-        } elseif (function_exists('curl_multi_exec')) {
-            $f = new SdkCurlFactory(50);
-            $obsClient->factorys[] = $f;
-            $handler = new CurlMultiHandler(['handle_factory' => $f1]);
-        }
-
-        if (ini_get('allow_url_fopen')) {
-            $handler = $handler
-                ? Proxy::wrapStreaming($handler, new SdkStreamHandler())
-                : new SdkStreamHandler();
-        } elseif (!$handler) {
-            throw new \RuntimeException('GuzzleHttp requires cURL, the '
-                .'allow_url_fopen ini setting, or a custom HTTP handler.');
-        }
-
-        return $handler;
-    }
 }
