@@ -1,15 +1,13 @@
 <?php
 
-namespace Loouss\ObsClient\Internal\Signature;
+namespace Loouss\ObsClient\Signature;
 
-use Loouss\ObsClient\Internal\Resource\Constants;
-use Loouss\ObsClient\Internal\Common\Model;
-use Loouss\ObsClient\Internal\Resource\V2Constants;
+use Loouss\ObsClient\Constant\ObsClientConst;
+use Loouss\ObsClient\Http\Common\Model;
 
 class DefaultSignature extends AbstractSignature
 {
     const INTEREST_HEADER_KEY_LIST = array('content-type', 'content-md5', 'date');
-
 
     public function __construct(
         $ak,
@@ -24,7 +22,7 @@ class DefaultSignature extends AbstractSignature
         parent::__construct($ak, $sk, $pathStyle, $endpoint, $methodName, $signature, $securityToken, $isCname);
     }
 
-    public function doAuth(array &$requestConfig, array &$params, Model $model)
+    public function doAuth(array &$requestConfig, array &$params, Model $model): array
     {
         $result = $this->prepareAuth($requestConfig, $params, $model);
 
@@ -36,23 +34,23 @@ class DefaultSignature extends AbstractSignature
 
         $signature = base64_encode(hash_hmac('sha1', $canonicalstring, $this->sk, true));
 
-        $constants = Constants::selectConstants($this->signature);
+        $constants = ObsClientConst::OBS_CONSTANT;
         $signatureFlag = $constants::FLAG;
 
-        $authorization = $signatureFlag.' '.$this->ak.':'.$signature;
+        $authorization = $signatureFlag . ' ' . $this->ak . ':' . $signature;
 
         $result['headers']['Authorization'] = $authorization;
 
         return $result;
     }
 
-    public function makeCanonicalstring($method, $headers, $pathArgs, $bucketName, $objectKey, $expires = null)
+    public function makeCanonicalstring($method, $headers, $pathArgs, $bucketName, $objectKey, $expires = null): string
     {
         $buffer = [];
         $buffer[] = $method;
         $buffer[] = "\n";
         $interestHeaders = [];
-        $constants = Constants::selectConstants($this->signature);
+        $constants = ObsClientConst::OBS_CONSTANT;
 
         foreach ($headers as $key => $value) {
             $key = strtolower($key);
@@ -81,7 +79,7 @@ class DefaultSignature extends AbstractSignature
 
         foreach ($interestHeaders as $key => $value) {
             if (strpos($key, $constants::HEADER_PREFIX) === 0) {
-                $buffer[] = $key.':'.$value;
+                $buffer[] = $key . ':' . $value;
             } else {
                 $buffer[] = $value;
             }
@@ -116,7 +114,7 @@ class DefaultSignature extends AbstractSignature
             foreach ($pathArgs as $key => $value) {
                 if (in_array(strtolower($key), $constants::ALLOWED_RESOURCE_PARAMTER_NAMES) || strpos($key,
                         $constants::HEADER_PREFIX) === 0) {
-                    $_pathArgs[] = $value === null || $value === '' ? $key : $key.'='.urldecode($value);
+                    $_pathArgs[] = $value === null || $value === '' ? $key : $key . '=' . urldecode($value);
                 }
             }
             if (!empty($_pathArgs)) {

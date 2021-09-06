@@ -1,6 +1,6 @@
 <?php
 
-namespace Loouss\ObsClient\Internal\Resource;
+namespace Loouss\ObsClient\Constant;
 
 class Constants
 {
@@ -95,17 +95,5 @@ class Constants
         'access-control-expose-headers',
         'connection'
     ];
-
-    public static function selectConstants($signature)
-    {
-        $signature = (strcasecmp($signature, 'obs') === 0) ? 'OBS' : 'V2';
-        return __NAMESPACE__.'\\'.$signature.'Constants';
-    }
-
-    public static function selectRequestResource($signature)
-    {
-        $signature = (strcasecmp($signature, 'obs') === 0) ? 'OBS' : 'V2';
-        return (__NAMESPACE__.'\\'.$signature.'RequestResource');
-    }
 
 }

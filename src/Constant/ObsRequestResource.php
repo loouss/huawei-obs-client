@@ -1,8 +1,8 @@
 <?php
 
-namespace Loouss\ObsClient\Internal\Resource;
+namespace Loouss\ObsClient\Constant;
 
-class OBSRequestResource
+class ObsRequestResource
 {
     public static $RESOURCE_ARRAY = [
         'operations' => [

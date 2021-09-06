@@ -1,6 +1,6 @@
 <?php
 
-namespace Loouss\ObsClient\Internal\Common;
+namespace Loouss\ObsClient\Http\Common;
 
 class SchemaFormatter
 {

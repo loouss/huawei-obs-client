@@ -1,10 +1,10 @@
 <?php
 
-namespace Loouss\ObsClient\Internal\Common;
+namespace Loouss\ObsClient\Http\Common;
 
-use Loouss\ObsClient\ObsClient;
+use Loouss\ObsClient\Constant\ObsClientConst;
 
-class ObsTransform implements ITransform
+class ObsTransform
 {
     private static $instance;
 
@@ -43,8 +43,8 @@ class ObsTransform implements ITransform
 
     private function transAclHeader($para)
     {
-        if ($para === ObsClient::AclAuthenticatedRead || $para === ObsClient::AclBucketOwnerRead ||
-            $para === ObsClient::AclBucketOwnerFullControl || $para === ObsClient::AclLogDeliveryWrite) {
+        if ($para === ObsClientConst::AclAuthenticatedRead || $para === ObsClientConst::AclBucketOwnerRead ||
+            $para === ObsClientConst::AclBucketOwnerFullControl || $para === ObsClientConst::AclLogDeliveryWrite) {
             $para = null;
         }
         return $para;
@@ -52,8 +52,8 @@ class ObsTransform implements ITransform
 
     private function transAclGroupUri($para)
     {
-        if ($para === ObsClient::GroupAllUsers) {
-            $para = ObsClient::AllUsers;
+        if ($para === ObsClientConst::GroupAllUsers) {
+            $para = ObsClientConst::AllUsers;
         }
         return $para;
     }
@@ -70,7 +70,11 @@ class ObsTransform implements ITransform
     private function transStorageClass($para)
     {
         $search = array('STANDARD', 'STANDARD_IA', 'GLACIER');
-        $repalce = array(ObsClient::StorageClassStandard, ObsClient::StorageClassWarm, ObsClient::StorageClassCold);
+        $repalce = array(
+            ObsClientConst::StorageClassStandard,
+            ObsClientConst::StorageClassWarm,
+            ObsClientConst::StorageClassCold
+        );
         $para = str_replace($search, $repalce, $para);
         return $para;
     }

@@ -1,20 +1,17 @@
 <?php
 
-namespace Loouss\ObsClient\Internal\Signature;
+namespace Loouss\ObsClient\Signature;
 
-use Loouss\ObsClient\Log\ObsLog;
-use Loouss\ObsClient\Internal\Resource\Constants;
+use Loouss\ObsClient\Constant\ObsClientConst;
+use Loouss\ObsClient\Http\Common\Model;
+use Loouss\ObsClient\Http\Common\ObsTransform;
+use Loouss\ObsClient\Http\Common\SchemaFormatter;
 use Loouss\ObsClient\ObsException;
-use Loouss\ObsClient\Internal\Common\SchemaFormatter;
 use GuzzleHttp\Psr7\Stream;
-use Loouss\ObsClient\Internal\Common\Model;
 use Psr\Http\Message\StreamInterface;
-use Loouss\ObsClient\Internal\Common\ObsTransform;
-use Loouss\ObsClient\Internal\Common\V2Transform;
 
-abstract class AbstractSignature implements SignatureInterface
+abstract class AbstractSignature
 {
-
     protected $ak;
 
     protected $sk;
@@ -31,7 +28,7 @@ abstract class AbstractSignature implements SignatureInterface
 
     protected $isCname;
 
-    public static function urlencodeWithSafe($val, $safe = '/')
+    public static function urlencodeWithSafe($val, $safe = '/'): string
     {
         if (($len = strlen($val)) === 0) {
             return '';
@@ -64,7 +61,7 @@ abstract class AbstractSignature implements SignatureInterface
         $this->isCname = $isCname;
     }
 
-    protected function transXmlByType($key, &$value, &$subParams, $transHolder)
+    protected function transXmlByType($key, &$value, &$subParams, $transHolder): string
     {
         $xml = [];
         $treatAsString = false;
@@ -81,9 +78,9 @@ abstract class AbstractSignature implements SignatureInterface
                 }
                 if (!empty($subXml)) {
                     if (!isset($value['data']['xmlFlattened'])) {
-                        $xml[] = '<'.$name.'>';
+                        $xml[] = '<' . $name . '>';
                         $xml[] = implode('', $subXml);
-                        $xml[] = '</'.$name.'>';
+                        $xml[] = '</' . $name . '>';
                     } else {
                         $xml[] = implode('', $subXml);
                     }
@@ -96,17 +93,17 @@ abstract class AbstractSignature implements SignatureInterface
                     $attr = [];
                     foreach ($properties as $pkey => $pvalue) {
                         if (isset($pvalue['required']) && $pvalue['required'] && !isset($subParams[$pkey])) {
-                            $obsException = new ObsException('param:'.$pkey.' is required');
+                            $obsException = new ObsException('param:' . $pkey . ' is required');
                             $obsException->setExceptionType('client');
                             throw $obsException;
                         }
                         if (isset($subParams[$pkey])) {
                             if (isset($pvalue['data']) && isset($pvalue['data']['xmlAttribute']) && $pvalue['data']['xmlAttribute']) {
                                 $attrValue = $this->xml_tansfer(trim(strval($subParams[$pkey])));
-                                $attr[$pvalue['sentAs']] = '"'.$attrValue.'"';
+                                $attr[$pvalue['sentAs']] = '"' . $attrValue . '"';
                                 if (isset($pvalue['data']['xmlNamespace'])) {
                                     $ns = substr($pvalue['sentAs'], 0, strpos($pvalue['sentAs'], ':'));
-                                    $attr['xmlns:'.$ns] = '"'.$pvalue['data']['xmlNamespace'].'"';
+                                    $attr['xmlns:' . $ns] = '"' . $pvalue['data']['xmlNamespace'] . '"';
                                 }
                             } else {
                                 $subXml[] = $this->transXmlByType($pkey, $pvalue, $subParams[$pkey], $transHolder);
@@ -118,13 +115,13 @@ abstract class AbstractSignature implements SignatureInterface
                         $_name = $name;
                         if (!empty($attr)) {
                             foreach ($attr as $akey => $avalue) {
-                                $_name .= ' '.$akey.'='.$avalue;
+                                $_name .= ' ' . $akey . '=' . $avalue;
                             }
                         }
                         if (!isset($value['data']['xmlFlattened'])) {
-                            $xml[] = '<'.$_name.'>';
+                            $xml[] = '<' . $_name . '>';
                             $xml[] = $val;
-                            $xml[] = '</'.$name.'>';
+                            $xml[] = '</' . $name . '>';
                         } else {
                             $xml[] = $val;
                         }
@@ -141,28 +138,28 @@ abstract class AbstractSignature implements SignatureInterface
         if ($treatAsString) {
             if ($type === 'boolean') {
                 if (!is_bool($subParams) && strval($subParams) !== 'false' && strval($subParams) !== 'true') {
-                    $obsException = new ObsException('param:'.$key.' is not a boolean value');
+                    $obsException = new ObsException('param:' . $key . ' is not a boolean value');
                     $obsException->setExceptionType('client');
                     throw $obsException;
                 }
             } else {
                 if ($type === 'numeric') {
                     if (!is_numeric($subParams)) {
-                        $obsException = new ObsException('param:'.$key.' is not a numeric value');
+                        $obsException = new ObsException('param:' . $key . ' is not a numeric value');
                         $obsException->setExceptionType('client');
                         throw $obsException;
                     }
                 } else {
                     if ($type === 'float') {
                         if (!is_float($subParams)) {
-                            $obsException = new ObsException('param:'.$key.' is not a float value');
+                            $obsException = new ObsException('param:' . $key . ' is not a float value');
                             $obsException->setExceptionType('client');
                             throw $obsException;
                         }
                     } else {
                         if ($type === 'int' || $type === 'integer') {
                             if (!is_int($subParams)) {
-                                $obsException = new ObsException('param:'.$key.' is not a int value');
+                                $obsException = new ObsException('param:' . $key . ' is not a int value');
                                 $obsException->setExceptionType('client');
                                 throw $obsException;
                             }
@@ -186,24 +183,24 @@ abstract class AbstractSignature implements SignatureInterface
             if (isset($val) && $val !== '') {
                 $val = $this->xml_tansfer($val);
                 if (!isset($value['data']['xmlFlattened'])) {
-                    $xml[] = '<'.$name.'>';
+                    $xml[] = '<' . $name . '>';
                     $xml[] = $val;
-                    $xml[] = '</'.$name.'>';
+                    $xml[] = '</' . $name . '>';
                 } else {
                     $xml[] = $val;
                 }
             } else {
                 if (isset($value['canEmpty']) && $value['canEmpty']) {
-                    $xml[] = '<'.$name.'>';
+                    $xml[] = '<' . $name . '>';
                     $xml[] = $val;
-                    $xml[] = '</'.$name.'>';
+                    $xml[] = '</' . $name . '>';
                 }
             }
         }
         $ret = implode('', $xml);
 
         if (isset($value['wrapper'])) {
-            $ret = '<'.$value['wrapper'].'>'.$ret.'</'.$value['wrapper'].'>';
+            $ret = '<' . $value['wrapper'] . '>' . $ret . '</' . $value['wrapper'] . '>';
         }
 
         return $ret;
@@ -217,10 +214,9 @@ abstract class AbstractSignature implements SignatureInterface
         return $transferXml;
     }
 
-    protected function prepareAuth(array &$requestConfig, array &$params, Model $model)
+    protected function prepareAuth(array &$requestConfig, array &$params, Model $model): array
     {
-        $transHolder = strcasecmp($this->signature,
-            'obs') === 0 ? ObsTransform::getInstance() : V2Transform::getInstance();
+        $transHolder = ObsTransform::getInstance();
         $method = $requestConfig['httpMethod'];
         $requestUrl = $this->endpoint;
         $headers = [];
@@ -244,7 +240,7 @@ abstract class AbstractSignature implements SignatureInterface
             $paramsMetadata = $requestConfig['requestParameters'];
             foreach ($paramsMetadata as $key => $value) {
                 if (isset($value['required']) && $value['required'] && !isset($params[$key])) {
-                    $obsException = new ObsException('param:'.$key.' is required');
+                    $obsException = new ObsException('param:' . $key . ' is required');
                     $obsException->setExceptionType('client');
                     throw $obsException;
                 }
@@ -256,28 +252,28 @@ abstract class AbstractSignature implements SignatureInterface
                         $type = $value['type'];
                         if ($type === 'boolean') {
                             if (!is_bool($val) && strval($val) !== 'false' && strval($val) !== 'true') {
-                                $obsException = new ObsException('param:'.$key.' is not a boolean value');
+                                $obsException = new ObsException('param:' . $key . ' is not a boolean value');
                                 $obsException->setExceptionType('client');
                                 throw $obsException;
                             }
                         } else {
                             if ($type === 'numeric') {
                                 if (!is_numeric($val)) {
-                                    $obsException = new ObsException('param:'.$key.' is not a numeric value');
+                                    $obsException = new ObsException('param:' . $key . ' is not a numeric value');
                                     $obsException->setExceptionType('client');
                                     throw $obsException;
                                 }
                             } else {
                                 if ($type === 'float') {
                                     if (!is_float($val)) {
-                                        $obsException = new ObsException('param:'.$key.' is not a float value');
+                                        $obsException = new ObsException('param:' . $key . ' is not a float value');
                                         $obsException->setExceptionType('client');
                                         throw $obsException;
                                     }
                                 } else {
                                     if ($type === 'int' || $type === 'integer') {
                                         if (!is_int($val)) {
-                                            $obsException = new ObsException('param:'.$key.' is not a int value');
+                                            $obsException = new ObsException('param:' . $key . ' is not a int value');
                                             $obsException->setExceptionType('client');
                                             throw $obsException;
                                         }
@@ -293,7 +289,7 @@ abstract class AbstractSignature implements SignatureInterface
                                 $sentAs = strtolower($value['sentAs']);
                                 foreach ($val as $k => $v) {
                                     $k = self::urlencodeWithSafe(strtolower($k), ' ;/?:@&=+$,');
-                                    $name = strpos($k, $sentAs) === 0 ? $k : $sentAs.$k;
+                                    $name = strpos($k, $sentAs) === 0 ? $k : $sentAs . $k;
                                     $headers[$name] = self::urlencodeWithSafe($v, ' ;/?:@&=+$,\'*');
                                 }
                             }
@@ -314,7 +310,7 @@ abstract class AbstractSignature implements SignatureInterface
                                 if ($type === 'password') {
                                     if (($val = strval($val)) !== '') {
                                         $name = isset($value['sentAs']) ? $value['sentAs'] : $key;
-                                        $pwdName = isset($value['pwdSentAs']) ? $value['pwdSentAs'] : $name.'-MD5';
+                                        $pwdName = isset($value['pwdSentAs']) ? $value['pwdSentAs'] : $name . '-MD5';
                                         $val1 = base64_encode($val);
                                         $val2 = base64_encode(md5($val, true));
                                         $headers[$name] = $val1;
@@ -373,7 +369,7 @@ abstract class AbstractSignature implements SignatureInterface
 
                                             if ($type === 'file') {
                                                 if (!file_exists($val)) {
-                                                    $obsException = new ObsException('file['.$val.'] does not exist');
+                                                    $obsException = new ObsException('file[' . $val . '] does not exist');
                                                     $obsException->setExceptionType('client');
                                                     throw $obsException;
                                                 }
@@ -413,22 +409,22 @@ abstract class AbstractSignature implements SignatureInterface
 
             if ($dnsParam) {
                 if ($this->pathStyle) {
-                    $requestUrl = $requestUrl.'/'.$dnsParam;
+                    $requestUrl = $requestUrl . '/' . $dnsParam;
                 } else {
                     $defaultPort = strtolower($url['scheme']) === 'https' ? '443' : '80';
-                    $host = $this->isCname ? $host : $dnsParam.'.'.$host;
-                    $requestUrl = $url['scheme'].'://'.$host.':'.(isset($url['port']) ? $url['port'] : $defaultPort);
+                    $host = $this->isCname ? $host : $dnsParam . '.' . $host;
+                    $requestUrl = $url['scheme'] . '://' . $host . ':' . (isset($url['port']) ? $url['port'] : $defaultPort);
                 }
             }
             if ($uriParam) {
-                $requestUrl = $requestUrl.'/'.$uriParam;
+                $requestUrl = $requestUrl . '/' . $uriParam;
             }
 
             if (!empty($pathArgs)) {
                 $requestUrl .= '?';
                 $_pathArgs = [];
                 foreach ($pathArgs as $key => $value) {
-                    $_pathArgs[] = $value === null || $value === '' ? $key : $key.'='.$value;
+                    $_pathArgs[] = $value === null || $value === '' ? $key : $key . '=' . $value;
                 }
                 $requestUrl .= implode('&', $_pathArgs);
             }
@@ -447,7 +443,6 @@ abstract class AbstractSignature implements SignatureInterface
             $headers['Content-Type'] = 'application/xml';
             $result['body'] = implode('', $body);
 
-            ObsLog::commonLog(DEBUG, 'request content '.$result['body']);
 
             if (isset($requestConfig['data']['contentMd5']) && $requestConfig['data']['contentMd5']) {
                 $headers['Content-MD5'] = base64_encode(md5($result['body'], true));
@@ -483,7 +478,7 @@ abstract class AbstractSignature implements SignatureInterface
             }
         }
 
-        $constants = Constants::selectConstants($this->signature);
+        $constants = ObsClientConst::OBS_CONSTANT;
 
         if ($this->securityToken) {
             $headers[$constants::SECURITY_TOKEN_HEAD] = $this->securityToken;

@@ -1,8 +1,8 @@
 <?php
 
-namespace Loouss\ObsClient\Internal\Resource;
+namespace Loouss\ObsClient\Constant;
 
-class OBSConstants extends Constants
+class ObsConstants extends Constants
 {
     const FLAG = 'OBS';
     const METADATA_PREFIX = 'x-obs-meta-';

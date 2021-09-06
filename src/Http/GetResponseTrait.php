@@ -1,17 +1,18 @@
 <?php
 
 
-namespace Loouss\ObsClient\Internal;
+namespace Loouss\ObsClient\Http;
 
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Exception\RequestException;
+use Loouss\ObsClient\Constant\ObsClientConst;
+use Loouss\ObsClient\Http\Common\CheckoutStream;
+use Loouss\ObsClient\Http\Common\Model;
 use Loouss\ObsClient\ObsException;
-use Loouss\ObsClient\Internal\Common\Model;
 use Loouss\ObsClient\Internal\Resource\Constants;
 use Loouss\ObsClient\Log\ObsLog;
 use Psr\Http\Message\StreamInterface;
-use Loouss\ObsClient\Internal\Common\CheckoutStream;
 
 trait GetResponseTrait
 {
@@ -118,7 +119,7 @@ trait GetResponseTrait
 
     private function parseCommonHeaders($model, $response)
     {
-        $constants = Constants::selectConstants($this->signature);
+        $constants =  ObsClientConst::OBS_CONSTANT;
         foreach ($constants::COMMON_HEADERS as $key => $value) {
             $model[$value] = $response->getHeaderLine($key);
         }
