@@ -5,7 +5,7 @@ namespace Loouss\ObsClient\Http;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7;
 use Loouss\ObsClient\Constant\ObsClientConst;
-use Loouss\ObsClient\Exceptions\RuntimeException;
+use Loouss\ObsClient\Exception\RuntimeException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Exception\RequestException;

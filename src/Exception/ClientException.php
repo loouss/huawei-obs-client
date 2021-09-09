@@ -1,6 +1,6 @@
 <?php
 
-namespace Loouss\ObsClient\Exceptions;
+namespace Loouss\ObsClient\Exception;
 
 use Psr\Http\Message\ResponseInterface;
 
