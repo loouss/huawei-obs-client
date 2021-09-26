@@ -322,7 +322,6 @@ trait SendRequestTrait
 
     protected function sendRequest($model, &$operation, $params, $request, $requestCount = 1)
     {
-        $start = microtime(true);
         $saveAsStream = false;
         if (isset($operation['stream']) && $operation['stream']) {
             $saveAsStream = isset($params['SaveAsStream']) ? $params['SaveAsStream'] : false;
@@ -359,8 +358,7 @@ trait SendRequestTrait
                 $operation,
                 $params,
                 $request,
-                $requestCount,
-                $start
+                $requestCount
             ) {
                 $statusCode = $response->getStatusCode();
                 $readable = isset($params['Body']) && ($params['Body'] instanceof StreamInterface || is_resource($params['Body']));
@@ -368,7 +366,7 @@ trait SendRequestTrait
                     if ($location = $response->getHeaderLine('location')) {
                         $url = parse_url($this->endpoint);
                         $newUrl = parse_url($location);
-                        $scheme = (isset($newUrl['scheme']) ? $newUrl['scheme'] : $url['scheme']);
+                        $scheme = isset($newUrl['scheme']) ? $newUrl['scheme'] : $url['scheme'];
                         $defaultPort = strtolower($scheme) === 'https' ? '443' : '80';
                         $this->doRequest($model, $operation, $params, $scheme.'://'.$newUrl['host'].
                             ':'.(isset($newUrl['port']) ? $newUrl['port'] : $defaultPort));
@@ -384,8 +382,7 @@ trait SendRequestTrait
                 $operation,
                 $params,
                 $request,
-                $requestCount,
-                $start
+                $requestCount
             ) {
                 $message = null;
                 if ($exception instanceof ConnectException) {
