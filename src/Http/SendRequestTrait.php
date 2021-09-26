@@ -100,9 +100,9 @@ trait SendRequestTrait
 
         if ($bucketName) {
             if ($this->pathStyle) {
-                $result = '/' . $bucketName;
+                $result = '/'.$bucketName;
             } else {
-                $host = $this->isCname ? $host : $bucketName . '.' . $host;
+                $host = $this->isCname ? $host : $bucketName.'.'.$host;
             }
         }
 
@@ -110,7 +110,7 @@ trait SendRequestTrait
 
         if ($objectKey) {
             $objectKey = $sign->urlencodeWithSafe($objectKey);
-            $result .= '/' . $objectKey;
+            $result .= '/'.$objectKey;
         }
 
         $result .= '?';
@@ -137,7 +137,7 @@ trait SendRequestTrait
             $_queryParams[$key] = $val;
             $result .= $key;
             if ($val) {
-                $result .= '=' . $val;
+                $result .= '='.$val;
             }
             $result .= '&';
         }
@@ -146,11 +146,11 @@ trait SendRequestTrait
             $expires);
         $signatureContent = base64_encode(hash_hmac('sha1', $canonicalstring, $this->sk, true));
 
-        $result .= 'Signature=' . $sign->urlencodeWithSafe($signatureContent);
+        $result .= 'Signature='.$sign->urlencodeWithSafe($signatureContent);
 
         $model = new Model();
         $model['ActualSignedRequestHeaders'] = $headers;
-        $model['SignedUrl'] = $url['scheme'] . '://' . $host . ':' . (isset($url['port']) ? $url['port'] : (strtolower($url['scheme']) === 'https' ? '443' : '80')) . $result;
+        $model['SignedUrl'] = $url['scheme'].'://'.$host.':'.(isset($url['port']) ? $url['port'] : (strtolower($url['scheme']) === 'https' ? '443' : '80')).$result;
         return $model;
     }
 
@@ -210,7 +210,7 @@ trait SendRequestTrait
 
                 if (!in_array($key, Constants::ALLOWED_REQUEST_HTTP_HEADER_METADATA_NAMES) && strpos($key,
                         $constants::HEADER_PREFIX) !== 0 && !in_array($key, $conditionAllowKeys)) {
-                    $key = $constants::METADATA_PREFIX . $key;
+                    $key = $constants::METADATA_PREFIX.$key;
                 }
 
                 $policy[] = '{"';
@@ -264,7 +264,7 @@ trait SendRequestTrait
         $operation = $resource['operations'][$method] ?? null;
 
         if (!$operation) {
-            throw new RuntimeException('unknow method ' . $originMethod);
+            throw new RuntimeException('unknow method '.$originMethod);
         }
 
         $model = new Model();
@@ -370,8 +370,8 @@ trait SendRequestTrait
                         $newUrl = parse_url($location);
                         $scheme = (isset($newUrl['scheme']) ? $newUrl['scheme'] : $url['scheme']);
                         $defaultPort = strtolower($scheme) === 'https' ? '443' : '80';
-                        $this->doRequest($model, $operation, $params, $scheme . '://' . $newUrl['host'] .
-                            ':' . (isset($newUrl['port']) ? $newUrl['port'] : $defaultPort));
+                        $this->doRequest($model, $operation, $params, $scheme.'://'.$newUrl['host'].
+                            ':'.(isset($newUrl['port']) ? $newUrl['port'] : $defaultPort));
                         return;
                     }
                 }
@@ -393,7 +393,7 @@ trait SendRequestTrait
                         $this->sendRequest($model, $operation, $params, $request, $requestCount + 1);
                         return;
                     } else {
-                        $message = 'Exceeded retry limitation, max retry count:' . $this->maxRetryCount . ', error message:' . $exception->getMessage();
+                        $message = 'Exceeded retry limitation, max retry count:'.$this->maxRetryCount.', error message:'.$exception->getMessage();
                     }
                 }
                 $this->parseException($model, $request, $exception, $message);
