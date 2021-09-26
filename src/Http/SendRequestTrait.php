@@ -320,7 +320,7 @@ trait SendRequestTrait
         $this->sendRequest($model, $operation, $params, $request);
     }
 
-    protected function sendRequest($model, &$operation, $params, $request, $requestCount = 1)
+    protected function sendRequest($model, &$operation, $params, Request $request, $requestCount = 1)
     {
         $saveAsStream = false;
         if (isset($operation['stream']) && $operation['stream']) {
@@ -349,9 +349,13 @@ trait SendRequestTrait
                 throw $obsException;
             }
         }
-
         try {
-            $response = $this->httpClient->send($request, ['stream' => $saveAsStream]);
+            $method = $request->getMethod();
+            $url = 'https://'.$request->getUri()->getHost().$request->getUri()->getPath();
+            $response = $this->httpClient->$method($url, [
+                'body' => $request->getBody()->getContents(),
+                'headers' => $request->getHeaders()
+            ]);
 
             $resolve = function (Response $response) use (
                 $model,
