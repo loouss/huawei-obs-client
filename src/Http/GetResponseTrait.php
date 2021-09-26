@@ -419,8 +419,6 @@ trait GetResponseTrait
     protected function buildException(Request $request, RequestException $exception, $message)
     {
         $response = $exception->hasResponse() ? $exception->getResponse() : null;
-        $con = $request->getBody()->getContents();
-        var_dump($con);
         $obsException = new ObsException($message ? $message : $exception->getMessage());
         $obsException->setExceptionType('client');
         $obsException->setRequest($request);
