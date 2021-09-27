@@ -26,4 +26,20 @@ class ObjectClient extends Client
         ]);
     }
 
+    public function getObject(string $key, string $versionId = null)
+    {
+        return $this->get(\urlencode($key), [
+            'query' => \compact('versionId'),
+        ]);
+    }
+
+    public function getObjectAcl(string $key, string $versionId = null)
+    {
+        return $this->get(\urlencode($key), [
+            'query' => [
+                'acl' => '',
+            ]
+        ]);
+    }
+
 }
