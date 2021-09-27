@@ -1,8 +1,8 @@
 <?php
 
-namespace Loouss\CosClient\Middleware;
+namespace Loouss\ObsClient\Middleware;
 
-use Overtrue\CosClient\Signature;
+use Loouss\ObsClient\Signature;
 use Psr\Http\Message\RequestInterface;
 
 class CreateRequestSignature
@@ -13,18 +13,15 @@ class CreateRequestSignature
 
     protected ?string $signatureExpires;
 
-    /**
-     * WithSignature constructor.
-     *
-     * @param  string  $secretId
-     * @param  string  $secretKey
-     * @param  string|null  $signatureExpires
-     */
-    public function __construct(string $secretId, string $secretKey, ?string $signatureExpires = null)
+    protected ?string $bucket;
+
+
+    public function __construct(string $secretId, string $secretKey, ?string $bucket, ?string $signatureExpires = null)
     {
         $this->secretId = $secretId;
         $this->secretKey = $secretKey;
         $this->signatureExpires = $signatureExpires;
+        $this->bucket = $bucket;
     }
 
     public function __invoke(callable $handler)
@@ -32,7 +29,7 @@ class CreateRequestSignature
         return function (RequestInterface $request, array $options) use ($handler) {
             $request = $request->withHeader(
                 'Authorization',
-                (new Signature($this->secretId, $this->secretKey))
+                (new Signature($this->secretId, $this->secretKey, $this->bucket))
                     ->createAuthorizationHeader($request, $this->signatureExpires)
             );
 
