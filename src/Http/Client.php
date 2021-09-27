@@ -90,10 +90,6 @@ class Client
             $this->handlerStack->unshift($middleware, $name);
         }
 
-        foreach ($this->middlewares as $name => $middleware) {
-            $this->handlerStack->unshift($middleware, $name);
-        }
-
         return $this->handlerStack;
     }
 }
