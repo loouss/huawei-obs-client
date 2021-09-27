@@ -5,6 +5,7 @@ namespace Loouss\ObsClient\Http;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\HandlerStack;
+use Hyperf\Guzzle\CoroutineHandler;
 use Loouss\ObsClient\Middleware\CreateRequestSignature;
 use Loouss\ObsClient\Middleware\SetContent;
 
@@ -79,7 +80,15 @@ class Client
             return $this->handlerStack;
         }
 
-        $this->handlerStack = HandlerStack::create();
+        if (class_exists(CoroutineHandler::class)) {
+            $this->handlerStack = HandlerStack::create(new CoroutineHandler());
+        } else {
+            $this->handlerStack = HandlerStack::create();
+        }
+
+        foreach ($this->middlewares as $name => $middleware) {
+            $this->handlerStack->unshift($middleware, $name);
+        }
 
         foreach ($this->middlewares as $name => $middleware) {
             $this->handlerStack->unshift($middleware, $name);
