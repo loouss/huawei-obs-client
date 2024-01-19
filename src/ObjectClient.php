@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Loouss\ObsClient;
 
 use Loouss\ObsClient\Http\Client;

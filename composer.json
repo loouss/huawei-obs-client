@@ -3,11 +3,11 @@
   "description": "OBS PHP SDK",
   "license": "MIT",
   "require": {
-    "php": ">=7.4",
-    "guzzlehttp/guzzle": "7.4.*",
-    "guzzlehttp/psr7": "2.1.0",
-    "guzzlehttp/promises": "1.5.*",
-    "psr/http-message": "1.0.1",
+    "php": ">=8.1",
+    "guzzlehttp/guzzle": "~7.4",
+    "guzzlehttp/psr7": "~2.1",
+    "guzzlehttp/promises": "~1.5",
+    "psr/http-message": "~1.0",
     "psr/log": "~1.1",
     "ext-curl": "*"
   },

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Loouss\ObsClient\Http;
 
 use GuzzleHttp\Exception\ClientException;
@@ -15,9 +17,9 @@ class Client
     protected string $sk;
     protected string $endpoint;
     protected string $bucket;
-    protected ?HandlerStack $handlerStack = null;
     protected array $middlewares = [];
 
+    protected ?HandlerStack $handlerStack = null;
     protected \GuzzleHttp\Client $client;
 
     public function __construct(string $ak, string $sk, string $endpoint, string $bucket, array $config = [])
@@ -37,7 +39,7 @@ class Client
         if (!is_null($name)) {
             $this->middlewares[$name] = $middleware;
         } else {
-            array_push($this->middlewares, $middleware);
+            $this->middlewares[] = $middleware;
         }
 
         return $this;
@@ -51,10 +53,9 @@ class Client
      */
     public function __call($method, $arguments)
     {
-        //$arguments[1]['debug'] = true;
         try {
             return $this->getHttpClient()->$method($arguments[0], $arguments[1]);
-        } catch (ClientException | ServerException $e) {
+        } catch (ClientException|ServerException $e) {
             throw $e;
         } catch (\Throwable $e) {
             throw new \Exception($e->getMessage(), $e->getCode(), $e->getPrevious());
@@ -63,10 +64,14 @@ class Client
 
     public function getHttpClient(): \GuzzleHttp\Client
     {
-        $options['base_uri'] = \sprintf('https://%s.'.$this->endpoint.'/', $this->bucket);
+        $options['base_uri'] = \sprintf('https://%s.' . $this->endpoint . '/', $this->bucket);
         return $this->client ?? $this->client = $this->createHttpClient($options);
     }
 
+    /**
+     * @param array $options
+     * @return \GuzzleHttp\Client
+     */
     public function createHttpClient(array $options = []): \GuzzleHttp\Client
     {
         return new \GuzzleHttp\Client(array_merge([
@@ -74,6 +79,9 @@ class Client
         ], $options));
     }
 
+    /**
+     * @return HandlerStack
+     */
     public function getHandlerStack(): HandlerStack
     {
         if ($this->handlerStack) {

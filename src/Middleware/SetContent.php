@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Loouss\ObsClient\Middleware;
 
 use GuzzleHttp\Psr7\MimeType;

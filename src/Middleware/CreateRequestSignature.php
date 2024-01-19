@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Loouss\ObsClient\Middleware;
 
 use Loouss\ObsClient\Signature;
@@ -24,7 +26,7 @@ class CreateRequestSignature
         $this->bucket = $bucket;
     }
 
-    public function __invoke(callable $handler)
+    public function __invoke(callable $handler): \Closure
     {
         return function (RequestInterface $request, array $options) use ($handler) {
             $request = $request->withHeader(
