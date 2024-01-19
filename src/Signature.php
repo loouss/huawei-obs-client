@@ -29,7 +29,7 @@ class Signature
         $buffer[] = "\n";
 
         if ($request->getHeaderLine('x-obs-storage-class')) {
-            $buffer[] = $request->getHeaderLine('Date');
+            $buffer[] = $request->getHeaderLine('x-obs-storage-class');
             $buffer[] = "\n";
         }
 
