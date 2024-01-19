@@ -26,14 +26,18 @@ class Signature
         $buffer[] = $request->getHeaderLine('Content-Type');
         $buffer[] = "\n";
         $buffer[] = $request->getHeaderLine('Date');
-
         $buffer[] = "\n";
 
-        $buffer[] = '/'.$this->bucket.$request->getUri()->getPath();
+        if ($request->getHeaderLine('x-obs-storage-class')) {
+            $buffer[] = $request->getHeaderLine('Date');
+            $buffer[] = "\n";
+        }
+
+        $buffer[] = '/' . $this->bucket . $request->getUri()->getPath();
         $stringToSign = implode('', $buffer);
         $signature = base64_encode(hash_hmac('sha1', $stringToSign, $this->secretKey, true));
 
-        return 'OBS'.' '.$this->accessKey.':'.$signature;
+        return 'OBS' . ' ' . $this->accessKey . ':' . $signature;
     }
 
 }
